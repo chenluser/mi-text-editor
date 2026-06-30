@@ -45,8 +45,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: buildozer-local-v1-${{ hashFiles('buildozer.spec', 'main.py') }}
-          restore-keys: buildozer-local-v1-
+          key: buildozer-local-v2-${{ hashFiles('buildozer.spec', 'main.py') }}
+          restore-keys: buildozer-local-v2-
 
       - name: Pre-install Android cmdline-tools
         run: |
