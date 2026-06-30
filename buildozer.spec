@@ -28,7 +28,9 @@ android.permissions = INTERNET
 
 # SDK / NDK (对齐漫画查看器成功配置)
 android.api = 33
-android.minapi = 24
+# minapi 必须 >= 26: Python 3.11.13 的 grpmodule.c 用到 setgrent/getgrent/endgrent,
+# 这些在 Android bionic libc 直到 API 26 才提供, 否则编译报 implicit declaration 错误。
+android.minapi = 26
 android.ndk = 25b
 android.sdk = 33
 android.accept_sdk_license = True
