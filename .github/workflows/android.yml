@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -25,9 +25,10 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk \
-            python3-pip autoconf automake libtool libtool-bin libltdl-dev \
-            pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev m4
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
+            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
+            cmake libffi-dev libssl-dev build-essential ccache
 
       - name: Install buildozer
         run: |
@@ -38,15 +39,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: buildozer-global-v1-${{ hashFiles('buildozer.spec') }}
-          restore-keys: buildozer-global-v1-
+          key: buildozer-global-v3-${{ hashFiles('buildozer.spec') }}
+          restore-keys: buildozer-global-v3-
 
       - name: Cache buildozer local
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: buildozer-local-v2-${{ hashFiles('buildozer.spec', 'main.py') }}
-          restore-keys: buildozer-local-v2-
+          key: buildozer-local-v3-${{ hashFiles('buildozer.spec', 'main.py') }}
+          restore-keys: buildozer-local-v3-
 
       - name: Pre-install Android cmdline-tools
         run: |
