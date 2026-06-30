@@ -11,10 +11,11 @@ version = 1.0.0
 # 不显式钉 python3 版本, 由 p4a 自带 recipe 决定 (下方锁定的 commit 默认 3.11.13)。
 requirements = python3,kivy==2.3.1,android,pyjnius
 
-# 锁定 p4a 到 "Update to Python 3.14" 之前的 commit (2025-10-08, 默认 Python 3.11.13)。
-# p4a master 现在强制 Python 3.14, 而 Kivy 2.3.1 的 C 代码不兼容 3.14 (texture.c 编译报错)。
+# 锁定 p4a 到正式发布版 v2024.01.21: python3 recipe = 3.11.5 (避开 master 的 3.14),
+# 推荐 NDK 正好是 25b (与下方 android.ndk 一致), 是经过发布测试的稳定版,
+# 不像中间 commit 会带 pyjnius 隔离构建 setuptools.build_meta 不兼容问题。
 p4a.url = https://github.com/kivy/python-for-android.git
-p4a.commit = 6b66944a2
+p4a.branch = v2024.01.21
 
 orientation = all
 fullscreen = 0
