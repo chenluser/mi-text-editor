@@ -1,0 +1,90 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk \
+            python3-pip autoconf libtool pkg-config zlib1g-dev \
+            libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+
+      - name: Install buildozer
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer cython==0.29.36
+
+      - name: Cache buildozer global
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-global-v1-${{ hashFiles('buildozer.spec') }}
+          restore-keys: buildozer-global-v1-
+
+      - name: Cache buildozer local
+        uses: actions/cache@v4
+        with:
+          path: .buildozer
+          key: buildozer-local-v1-${{ hashFiles('buildozer.spec', 'main.py') }}
+          restore-keys: buildozer-local-v1-
+
+      - name: Pre-install Android cmdline-tools
+        run: |
+          set -e
+          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          cd /tmp
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdtools.zip
+          unzip -q cmdtools.zip
+          mkdir -p "$SDK_ROOT/cmdline-tools/latest"
+          cp -r cmdline-tools/* "$SDK_ROOT/cmdline-tools/latest/"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+
+      - name: Build APK (release)
+        run: |
+          export ANDROIDSDK="$HOME/.buildozer/android/platform/android-sdk"
+          buildozer android release
+
+      - name: Sign APK
+        run: |
+          set -e
+          export ANDROIDSDK="$HOME/.buildozer/android/platform/android-sdk"
+          cd bin
+          UNSIGNED=$(ls *-release-unsigned.apk 2>/dev/null || ls *-release.apk)
+          echo "Unsigned APK: $UNSIGNED"
+          keytool -genkey -v -keystore tmp.keystore -alias tmp \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=MiTextEditor, OU=Dev, O=Dev, L=City, S=State, C=CN"
+          BT=$(ls -d "$ANDROIDSDK/build-tools/"*/ | sort -V | tail -1)
+          "${BT}zipalign" -f 4 "$UNSIGNED" aligned.apk
+          "${BT}apksigner" sign --ks tmp.keystore --ks-pass pass:android \
+            --key-pass pass:android --out "MiTextEditor-${{ github.run_number }}.apk" aligned.apk
+          rm -f "$UNSIGNED" aligned.apk tmp.keystore
+          ls -la
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiTextEditor-APK-build${{ github.run_number }}
+          path: bin/*.apk

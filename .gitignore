@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Buildozer / build artifacts
+.buildozer/
+bin/
+*.apk
+*.aab
+
+# Config / local
+config.json
+*.tmp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
