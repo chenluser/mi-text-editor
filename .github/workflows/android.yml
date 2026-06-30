@@ -58,7 +58,14 @@ jobs:
           unzip -q cmdtools.zip
           mkdir -p "$SDK_ROOT/cmdline-tools/latest"
           cp -r cmdline-tools/* "$SDK_ROOT/cmdline-tools/latest/"
+          # buildozer 在旧路径 tools/bin/sdkmanager 找 sdkmanager, 建软链指向新位置
+          mkdir -p "$SDK_ROOT/tools/bin"
+          ln -sf "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "$SDK_ROOT/tools/bin/sdkmanager"
+          ln -sf "$SDK_ROOT/cmdline-tools/latest/bin/avdmanager" "$SDK_ROOT/tools/bin/avdmanager"
           yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+          # 预装 buildozer 需要的 SDK 组件, 避免它走旧路径再装
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" "platforms;android-33" "build-tools;33.0.2" >/dev/null 2>&1 || true
 
       - name: Build APK (release)
         run: |
