@@ -5,7 +5,7 @@ package.domain = org.chenluser
 source.dir = .
 source.include_exts = py,png,jpg,ttf,ttc,otf
 source.exclude_dirs = tests,bin,.buildozer,__pycache__
-version = 1.0.1
+version = 1.0.2
 
 # 对齐漫画查看器验证过的版本组合 (kivy 2.3.1 + ndk 25b + sdk 33 + 单架构)。
 # 不显式钉 python3 版本, 由 p4a 自带 recipe 决定 (下方锁定的 commit 默认 3.11.13)。
@@ -20,12 +20,12 @@ p4a.branch = v2024.01.21
 orientation = all
 fullscreen = 0
 
-# SAF / DocumentFile 需要 androidx 支持库
-android.gradle_dependencies = androidx.documentfile:documentfile:1.0.1
-android.enable_androidx = True
+# [验证构建] 临时移除 androidx 依赖, 确认是否为闪退元凶。SAF 暂不可用。
+# android.gradle_dependencies = androidx.documentfile:documentfile:1.0.1
+# android.enable_androidx = True
 
-# 权限: SAF 本身不需要存储权限
-android.permissions = INTERNET
+# 权限: 验证构建用普通路径后端访问公共存储, 需要存储权限
+android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE
 
 # SDK / NDK (对齐漫画查看器成功配置)
 android.api = 33

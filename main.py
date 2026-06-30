@@ -750,7 +750,24 @@ class TextEditorApp(App):
 
     def _init_backend(self):
         if IS_ANDROID:
-            self.backend = AndroidSAFBackend()
+            # 优先 SAF; 若 androidx 不可用 (验证构建/集成失败), 降级到普通路径后端
+            try:
+                self.backend = AndroidSAFBackend()
+                self._saf_ok = True
+            except Exception:
+                self._saf_ok = False
+                # 申请所有文件访问权限后, 用普通路径访问 /sdcard
+                try:
+                    from android.permissions import request_permissions, Permission
+                    request_permissions([Permission.READ_EXTERNAL_STORAGE,
+                                         Permission.WRITE_EXTERNAL_STORAGE])
+                except Exception:
+                    pass
+                base = '/sdcard' if os.path.isdir('/sdcard') else '/storage/emulated/0'
+                self.backend = DesktopBackend(base)
+                toast('SAF 不可用, 已降级为普通路径模式 (%s)' % base)
+                self.browse.open_root()
+                return
             saved = self.cfg.get('tree_uri')
             if saved:
                 try:
