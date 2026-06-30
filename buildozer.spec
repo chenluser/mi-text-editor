@@ -5,7 +5,7 @@ package.domain = org.chenluser
 source.dir = .
 source.include_exts = py,png,jpg,ttf,ttc,otf
 source.exclude_dirs = tests,bin,.buildozer,__pycache__
-version = 1.0.0
+version = 1.0.1
 
 # 对齐漫画查看器验证过的版本组合 (kivy 2.3.1 + ndk 25b + sdk 33 + 单架构)。
 # 不显式钉 python3 版本, 由 p4a 自带 recipe 决定 (下方锁定的 commit 默认 3.11.13)。

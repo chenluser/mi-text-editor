@@ -682,6 +682,33 @@ class EditScreen(Screen):
 # ================================================================
 class TextEditorApp(App):
     def build(self):
+        try:
+            return self._build()
+        except Exception:
+            return self._error_screen(traceback.format_exc())
+
+    def _error_screen(self, tb):
+        """启动崩溃时, 把完整 traceback 显示在屏幕并写日志, 而不是闪退。"""
+        try:
+            with open(os.path.join(os.path.dirname(_config_path()),
+                                   'crash.log'), 'w', encoding='utf-8') as f:
+                f.write(tb)
+        except Exception:
+            pass
+        root = BoxLayout(orientation='vertical', padding=dp(8))
+        root.add_widget(Label(text='启动出错 (截图发给开发者):',
+                              font_name=FONT, size_hint_y=None, height=dp(36),
+                              color=(1, 0.5, 0.5, 1)))
+        sv = ScrollView()
+        lbl = Label(text=tb, font_name=FONT, font_size=dp(12),
+                    halign='left', valign='top', size_hint_y=None)
+        lbl.bind(width=lambda w, x: setattr(w, 'text_size', (x, None)),
+                 texture_size=lambda w, s: setattr(w, 'height', s[1]))
+        sv.add_widget(lbl)
+        root.add_widget(sv)
+        return root
+
+    def _build(self):
         self.title = '小米文本编辑器'
         self.cfg = load_config()
         self.backend = None
@@ -693,8 +720,33 @@ class TextEditorApp(App):
         self.sm.add_widget(self.browse)
         self.sm.add_widget(self.edit)
 
-        Clock.schedule_once(lambda dt: self._init_backend(), 0.3)
+        Clock.schedule_once(lambda dt: self._init_backend_safe(), 0.3)
         return self.sm
+
+    def _init_backend_safe(self):
+        try:
+            self._init_backend()
+        except Exception as e:
+            # 后端初始化失败不闪退, 弹窗显示原因
+            tb = traceback.format_exc()
+            try:
+                with open(os.path.join(os.path.dirname(_config_path()),
+                                       'crash.log'), 'w', encoding='utf-8') as f:
+                    f.write(tb)
+            except Exception:
+                pass
+            box = BoxLayout(orientation='vertical', padding=dp(10))
+            sv = ScrollView()
+            lbl = Label(text='后端初始化失败:\n\n' + tb, font_name=FONT,
+                        font_size=dp(12), halign='left', valign='top',
+                        size_hint_y=None)
+            lbl.bind(width=lambda w, x: setattr(w, 'text_size', (x, None)),
+                     texture_size=lambda w, s: setattr(w, 'height', s[1]))
+            sv.add_widget(lbl)
+            box.add_widget(sv)
+            p = Popup(title='错误', content=box, size_hint=(0.95, 0.8),
+                      title_font=FONT)
+            p.open()
 
     def _init_backend(self):
         if IS_ANDROID:
@@ -768,4 +820,12 @@ if __name__ == '__main__':
     try:
         TextEditorApp().run()
     except Exception:
+        tb = traceback.format_exc()
         traceback.print_exc()
+        # 落盘, 便于无 adb 时排查
+        try:
+            with open(os.path.join(os.path.dirname(_config_path()),
+                                   'crash.log'), 'w', encoding='utf-8') as f:
+                f.write(tb)
+        except Exception:
+            pass
