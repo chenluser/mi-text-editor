@@ -5,7 +5,7 @@ package.domain = org.chenluser
 source.dir = .
 source.include_exts = py,png,jpg,ttf,ttc,otf
 source.exclude_dirs = tests,bin,.buildozer,__pycache__
-version = 1.0.4
+version = 1.0.5
 
 # 完全对齐漫画查看器 2026-05-20 成功配置: 裸用 p4a master (不锁版本!),
 # Kivy 2.3.1 + Python 3.14 + NDK 25b + minAPI 24 已验证可在小米手机运行。
