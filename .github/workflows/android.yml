@@ -39,15 +39,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: buildozer-global-v4-${{ hashFiles('buildozer.spec') }}
-          restore-keys: buildozer-global-v4-
+          key: buildozer-global-v5-${{ hashFiles('buildozer.spec') }}
+          restore-keys: buildozer-global-v5-
 
       - name: Cache buildozer local
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: buildozer-local-v4-${{ hashFiles('buildozer.spec', 'main.py') }}
-          restore-keys: buildozer-local-v4-
+          key: buildozer-local-v5-${{ hashFiles('buildozer.spec', 'main.py') }}
+          restore-keys: buildozer-local-v5-
 
       - name: Pre-install Android cmdline-tools
         run: |
